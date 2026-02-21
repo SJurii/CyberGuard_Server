@@ -8,7 +8,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService {
-    private UserRepesitory userRepesitory;
+    private final UserRepesitory userRepesitory;
+
+    public AuthService(UserRepesitory userRepesitory){
+        this.userRepesitory = userRepesitory;
+    }
 
     public User registration(Registration request){
         User user = new User();
