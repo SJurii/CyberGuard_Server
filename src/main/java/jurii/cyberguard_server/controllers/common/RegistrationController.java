@@ -1,20 +1,34 @@
 package jurii.cyberguard_server.controllers.common;
 
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.bind.annotation.*;
+import jurii.cyberguard_server.DTO.Login;
 import jurii.cyberguard_server.DTO.Registration;
 import jurii.cyberguard_server.entity.Role;
 import jurii.cyberguard_server.entity.User;
+import jurii.cyberguard_server.jwt.JwtTokenUnit;
+import jurii.cyberguard_server.repo.UserRepesitory;
 import jurii.cyberguard_server.services.AuthService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
 public class RegistrationController {
 
     private final AuthService authService;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtTokenUnit jwtTokenUnit;
+    private final UserRepesitory userRepesitory;
 
-    public RegistrationController(AuthService service){
+    public RegistrationController(AuthService service, PasswordEncoder passwordEncoder, JwtTokenUnit jwtTokenUnit, UserRepesitory userRepesitory){
         this.authService = service;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtTokenUnit = jwtTokenUnit;
+        this.userRepesitory = userRepesitory;
     }
 
     @PostMapping("/register")
@@ -24,5 +38,24 @@ public class RegistrationController {
         authService.registration(request);
 
         return ResponseEntity.ok("User registered");
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> authenticateUser(@RequestBody Login request) {
+        User user = userRepesitory.findByEmail(request.getEmail());
+
+        if (user != null && passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            String token = jwtTokenUnit.generateToken(request.getEmail());
+
+            // Добавляем "id" в Map!
+            return ResponseEntity.ok(Map.of(
+                    "token", token,
+                    "id", user.getId(), // Теперь фронт получит ID
+                    "username", user.getName(),
+                    "email", user.getEmail()
+            ));
+        } else {
+            return ResponseEntity.status(401).body("Неверный логин или пароль");
+        }
     }
 }
