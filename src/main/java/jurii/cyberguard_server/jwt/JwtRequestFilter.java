@@ -41,14 +41,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             try {
                 username = jwtTokenUnit.extractUsername(jwt);
             } catch (Exception e) {
-                // Если токен кривой — просто логируем и идем дальше.
-                // Мы не устанавливаем аутентификацию, и Spring сам заблокирует
-                // запрос позже, если этот эндпоинт защищен.
                 logger.error("Не удалось извлечь username из JWT: " + e.getMessage());
             }
         }
 
-        // Измени блок проверки внутри doFilterInternal:
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             boolean isValid = jwtTokenUnit.validateToken(jwt, username);
             System.out.println("--- Проверка токена для " + username + ": " + isValid);

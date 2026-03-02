@@ -47,10 +47,9 @@ public class RegistrationController {
         if (user != null && passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             String token = jwtTokenUnit.generateToken(request.getEmail());
 
-            // Добавляем "id" в Map!
             return ResponseEntity.ok(Map.of(
                     "token", token,
-                    "id", user.getId(), // Теперь фронт получит ID
+                    "id", user.getId(),
                     "username", user.getName(),
                     "email", user.getEmail()
             ));

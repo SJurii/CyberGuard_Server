@@ -23,7 +23,6 @@ public class JwtTokenUnit {
                 .setClaims(claims)
                 .setSubject(email)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                // ВОТ ЭТОГО НЕ ХВАТАЕТ:
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 часов
                 .signWith(SignatureAlgorithm.HS512, SECTER_KEY)
                 .compact();
@@ -34,17 +33,14 @@ public class JwtTokenUnit {
             final String extractedUsername = extractUsername(token);
             Claims claims = extractAllClaims(token);
 
-            // Проверяем, есть ли вообще дата истечения
             if (claims.getExpiration() == null) {
-                System.out.println("--- ВНИМАНИЕ: В токене нет даты Expiration!");
-                // Можешь вернуть true, если доверяешь таким токенам,
-                // но лучше исправить генерацию.
+                System.out.println("В токене нет даты");
                 return extractedUsername.equals(username);
             }
 
             return (extractedUsername.equals(username) && !isTokenExpired(token));
         } catch (Exception e) {
-            System.out.println("--- Ошибка валидации: " + e.getMessage());
+            System.out.println("Ошибка валидации: " + e.getMessage());
             return false;
         }
     }
