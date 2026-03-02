@@ -25,7 +25,7 @@ public class AccountController {
                         "email", user.getEmail(),
                         "rank", "Тестер",
                         "points", 1000,
-                        "birthDate", "2000-01-01",
+                        "createdAt", user.getCreatedAt(),
                         "achievements", List.of() // Пока пустой список, чтобы React не упал
                 )))
                 .orElse(ResponseEntity.notFound().build());
