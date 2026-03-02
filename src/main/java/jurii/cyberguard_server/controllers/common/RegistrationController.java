@@ -51,7 +51,8 @@ public class RegistrationController {
                     "token", token,
                     "id", user.getId(),
                     "username", user.getName(),
-                    "email", user.getEmail()
+                    "email", user.getEmail(),
+                    "createdAt", user.getCreatedAt()
             ));
         } else {
             return ResponseEntity.status(401).body("Неверный логин или пароль");
