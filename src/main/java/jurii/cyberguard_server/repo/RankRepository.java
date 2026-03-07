@@ -7,5 +7,6 @@ import org.springframework.stereotype.Repository;
 
 public interface RankRepository extends JpaRepository<Rank, Long> {
     Rank findFirstByMinPointsLessThanEqualOrderByMinPointsDesc(int minPoints);
+    Rank getRankById(long id);
 
 }

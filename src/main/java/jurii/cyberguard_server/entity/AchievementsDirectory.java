@@ -1,13 +1,12 @@
 package jurii.cyberguard_server.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 
 @Entity
-@Table(name = "achievements_directory")
+@Table(name = "achivements_directory")
 @Getter
 @Setter
 public class AchievementsDirectory {
