@@ -1,17 +1,14 @@
 package jurii.cyberguard_server.controllers.common;
 
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 import jurii.cyberguard_server.DTO.Login;
 import jurii.cyberguard_server.DTO.Registration;
-import jurii.cyberguard_server.entity.Role;
 import jurii.cyberguard_server.entity.User;
 import jurii.cyberguard_server.jwt.JwtTokenUnit;
 import jurii.cyberguard_server.repo.UserRepesitory;
 import jurii.cyberguard_server.services.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -46,7 +43,6 @@ public class RegistrationController {
 
         if (user != null && passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             String token = jwtTokenUnit.generateToken(request.getEmail());
-
             return ResponseEntity.ok(Map.of(
                     "token", token,
                     "id", user.getId(),
