@@ -48,6 +48,9 @@ public class RegistrationController {
                     "id", user.getId(),
                     "username", user.getName(),
                     "email", user.getEmail(),
+                    "userRole", user.getRole(),
+                    "totalPoints", user.getTotalPoints(),
+                    "nextRankPoints", user.getRank().getNextLvl().getMinPoints(),
                     "createdAt", user.getCreatedAt()
             ));
         } else {

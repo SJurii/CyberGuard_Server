@@ -10,7 +10,6 @@ public class CyberGuardServerApplication {
     public static void main(String[] args) {
         SpringApplication.run(CyberGuardServerApplication.class, args);
 
-
     }
 
 }

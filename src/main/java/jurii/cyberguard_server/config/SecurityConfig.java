@@ -43,10 +43,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/profile/**").permitAll()
+                        // ДОБАВЬ ЭТУ СТРОКУ:
+                        .requestMatchers("/api/scenarios/**").permitAll()
                         .anyRequest().authenticated()
                 )
-
-                // отключил сессии
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
