@@ -4,7 +4,6 @@ package jurii.cyberguard_server.controllers.secure;
 import jurii.cyberguard_server.DTO.ScoreRequest;
 import jurii.cyberguard_server.entity.AchievementsDirectory;
 import jurii.cyberguard_server.entity.User;
-import jurii.cyberguard_server.entity.UserAchivement;
 import jurii.cyberguard_server.repo.AchivementRepository;
 import jurii.cyberguard_server.repo.UserAchivementRepository;
 import jurii.cyberguard_server.repo.UserRepesitory;
@@ -12,7 +11,6 @@ import jurii.cyberguard_server.services.ScoreService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.List;
 
@@ -38,14 +36,10 @@ public class AccountController {
     public ResponseEntity<?> getUserProfile(@PathVariable Long id) {
         return userRepesitory.findById(id)
                 .map(user -> {
-                    // 1. Собираем детализированный список ачивок
                     List<Map<String, Object>> achievementsWithDetails = userAchivementRepository.findAllByUserId(id)
                             .stream()
                             .map(ua -> {
                                 var details = achivementRepository.findById(ua.getAchivementId()).orElse(null);
-
-                                // Создаем карту данных для фронтенда
-                                // Используем HashMap, если какие-то поля могут быть null (Map.of не любит null)
                                 Map<String, Object> achMap = new java.util.HashMap<>();
                                 achMap.put("title", details != null ? details.getTitle() : "Секретная ачивка");
                                 achMap.put("description", details != null ? details.getDescription() : "Описание скрыто");
@@ -55,7 +49,6 @@ public class AccountController {
                                 return achMap;
                             }).toList();
 
-                    // 2. Возвращаем полный профиль
                     return ResponseEntity.ok(Map.of(
                             "name", user.getName(),
                             "email", user.getEmail(),
@@ -63,7 +56,8 @@ public class AccountController {
                             "totalPoints", user.getTotalPoints(),
                             "nextRankPoints", user.getRank().getNextLvl().getMinPoints(),
                             "createdAt", user.getCreatedAt(),
-                            "achievements", achievementsWithDetails // ИСПОЛЬЗУЕМ ОБРАБОТАННЫЙ СПИСОК
+                            "role", user.getRole(),
+                            "achievements", achievementsWithDetails
                     ));
                 })
                 .orElse(ResponseEntity.notFound().build());
