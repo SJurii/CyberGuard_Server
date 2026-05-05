@@ -53,23 +53,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             System.out.println("--- Проверка токена для " + username + ": " + isValid);
 
             if (isValid) {
-                // Извлекаем роль из токена
                 String role = jwtTokenUnit.extractRole(jwt);
-
-                // Spring Security ожидает префикс ROLE_ для hasRole()
-                List<SimpleGrantedAuthority> authorities = Collections.singletonList(
-                        new SimpleGrantedAuthority("ROLE_" + role)
-                );
-
+                // Просто передаем роль как есть, без лишних оберток, если это ломает логику
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                        username,
-                        null,
-                        authorities // Передаем список ролей вместо пустого ArrayList
+                        username, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role))
                 );
-
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
-                System.out.println("--- АУТЕНТИФИКАЦИЯ УСТАНОВЛЕНА С РОЛЬЮ: " + authorities);
             }
             else
             {

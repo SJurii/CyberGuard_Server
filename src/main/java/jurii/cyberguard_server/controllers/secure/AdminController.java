@@ -1,12 +1,15 @@
 package jurii.cyberguard_server.controllers.secure;
 
+import jurii.cyberguard_server.DTO.UpdateNameRequest;
 import jurii.cyberguard_server.entity.User;
+import jurii.cyberguard_server.repo.UserRepository;
 import jurii.cyberguard_server.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -17,6 +20,8 @@ public class AdminController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private UserRepository userRepository;
 
     // Метод для обновления роли пользователя
     @PatchMapping("/{id}/role")
@@ -52,5 +57,18 @@ public class AdminController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка сервера");
         }
+    }
+    @PatchMapping("/{id}/update-name")
+    public ResponseEntity<?> updateUserName(@PathVariable Long id, @RequestBody UpdateNameRequest request) {
+        return userRepository.findById(id)
+                .map(user -> {
+                    if (request.getName() == null || request.getName().trim().isEmpty()) {
+                        return ResponseEntity.badRequest().body("Имя не может быть пустым");
+                    }
+                    user.setName(request.getName());
+                    userRepository.save(user);
+                    return ResponseEntity.ok().build();
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 }
