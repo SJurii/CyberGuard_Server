@@ -6,7 +6,7 @@ import jurii.cyberguard_server.entity.AchievementsDirectory;
 import jurii.cyberguard_server.entity.User;
 import jurii.cyberguard_server.repo.AchivementRepository;
 import jurii.cyberguard_server.repo.UserAchivementRepository;
-import jurii.cyberguard_server.repo.UserRepesitory;
+import jurii.cyberguard_server.repo.UserRepository;
 import jurii.cyberguard_server.services.ScoreService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,15 +18,15 @@ import java.util.List;
 @RequestMapping("/api/profile")
 public class AccountController {
 
-    private final UserRepesitory userRepesitory;
+    private final UserRepository userRepository;
     private final ScoreService scoreService;
     private final AchivementRepository achivementRepository;
     private final UserAchivementRepository userAchivementRepository;
 
-    public AccountController(UserRepesitory userRepesitory, ScoreService scoreService,
+    public AccountController(UserRepository userRepository, ScoreService scoreService,
                              AchivementRepository achivementRepository,
                              UserAchivementRepository userAchivementRepository) {
-        this.userRepesitory = userRepesitory;
+        this.userRepository = userRepository;
         this.scoreService = scoreService;
         this.achivementRepository = achivementRepository;
         this.userAchivementRepository = userAchivementRepository;
@@ -34,7 +34,7 @@ public class AccountController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserProfile(@PathVariable Long id) {
-        return userRepesitory.findById(id)
+        return userRepository.findById(id)
                 .map(user -> {
                     List<Map<String, Object>> achievementsWithDetails = userAchivementRepository.findAllByUserId(id)
                             .stream()
@@ -67,7 +67,7 @@ public class AccountController {
     public ResponseEntity<?> addPointsController(@PathVariable Long id, @RequestBody ScoreRequest request) {
         List<AchievementsDirectory> newAwards= scoreService.addPoints(id, request.getPoints(), request.getReason());
 
-        User userUpdate = userRepesitory.findById(id).orElse(null);
+        User userUpdate = userRepository.findById(id).orElse(null);
 
         return ResponseEntity.ok(Map.of(
                 "user", userUpdate,
@@ -77,7 +77,7 @@ public class AccountController {
 
     @GetMapping("/leaderboard")
     public ResponseEntity<List<User>> getLeaderBoard() {
-        List<User> users = userRepesitory.findAll();
+        List<User> users = userRepository.findAll();
         return ResponseEntity.ok(users);
     }
 

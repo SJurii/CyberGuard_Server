@@ -6,19 +6,19 @@ import jurii.cyberguard_server.entity.Rank;
 import jurii.cyberguard_server.entity.Role;
 import jurii.cyberguard_server.entity.User;
 import jurii.cyberguard_server.repo.RankRepository;
-import jurii.cyberguard_server.repo.UserRepesitory;
+import jurii.cyberguard_server.repo.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Transactional
 @Service
 public class AuthService {
-    private final UserRepesitory userRepesitory;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RankRepository rankRepository;
 
-    public AuthService(UserRepesitory userRepesitory, PasswordEncoder passwordEncoder, RankRepository rankRepository){
-        this.userRepesitory = userRepesitory;
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, RankRepository rankRepository){
+        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.rankRepository = rankRepository;
     }
@@ -35,7 +35,7 @@ public class AuthService {
         user.setTotalPoints(0);
         user.setRank(rank);
 
-        return userRepesitory.save(user);
+        return userRepository.save(user);
     }
 
 }

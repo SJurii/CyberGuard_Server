@@ -5,6 +5,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jurii.cyberguard_server.entity.User;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -17,15 +18,22 @@ public class JwtTokenUnit {
     private static final SecretKey SECTER_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS512);;
     private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 10;
 
-    public String generateToken(String email) {
+    public String generateToken(User user) { // Теперь принимаем объект User
         Map<String, Object> claims = new HashMap<>();
+        claims.put("role", user.getRole().name()); // Сохраняем роль (например, "ADMIN")
+
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(email)
+                .setSubject(user.getEmail())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 часов
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS512, SECTER_KEY)
                 .compact();
+    }
+
+    // Добавь метод для извлечения роли
+    public String extractRole(String token) {
+        return (String) extractAllClaims(token).get("role");
     }
 
     public Boolean validateToken(String token, String username) {
