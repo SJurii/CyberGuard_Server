@@ -5,6 +5,7 @@ import jurii.cyberguard_server.jwt.JwtRequestFilter;
 import jurii.cyberguard_server.jwt.JwtTokenUnit;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -39,19 +40,27 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                // 1. ПЕРВЫМ ДЕЛОМ ВКЛЮЧАЕМ CORS
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
+
+                // Внутри filterChain замени блок authorizeHttpRequests на этот:
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // ПУБЛИЧНЫЙ ДОСТУП: Сначала разрешаем ВСЕ GET-запросы к сценариям
+                        .requestMatchers(HttpMethod.GET, "/api/scenarios/**").permitAll()
+
+                        // ЗАЩИТА: А вот POST (создание) — только для ADMIN
+                        .requestMatchers(HttpMethod.POST, "/api/scenarios/**").hasAuthority("ROLE_ADMIN")
+
+                        .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/api/profile/**").permitAll()
-                        .requestMatchers("/api/scenarios/**").permitAll()
-                        // Настраиваем доступ к админке только для ADMIN
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
                         .anyRequest().authenticated()
                 )
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -59,10 +68,20 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000")); // твой фронтенд
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")); // ДОБАВЬ PATCH И OPTIONS
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        // Разрешаем твой фронтенд явно
+        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+
+        // Разрешаем ВСЕ методы, включая OPTIONS (критично для логина)
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+
+        // Разрешаем ВСЕ заголовки (Content-Type, Authorization и т.д.)
+        configuration.setAllowedHeaders(List.of("*"));
+
+        // Позволяет передавать куки и заголовки авторизации
         configuration.setAllowCredentials(true);
+
+        // Чтобы браузер видел заголовок Authorization в ответе
+        configuration.setExposedHeaders(List.of("Authorization"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

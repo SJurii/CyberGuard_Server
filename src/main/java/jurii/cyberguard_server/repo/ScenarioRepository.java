@@ -10,7 +10,9 @@ import java.util.Optional;
 public interface ScenarioRepository extends JpaRepository<Scenario, Long> {
     // Поиск всех сценариев конкретного типа (например, 'Email')
     List<Scenario> findAllByType(String type);
+    List<Scenario> findByType(String type);
 
     // Поиск конкретного сценария по его техническому имени
     Optional<Scenario> findByName(String name);
+
 }
