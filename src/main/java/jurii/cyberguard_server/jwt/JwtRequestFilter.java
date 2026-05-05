@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -15,6 +16,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
@@ -50,13 +53,26 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             System.out.println("--- Проверка токена для " + username + ": " + isValid);
 
             if (isValid) {
-                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                        username, null, new ArrayList<>()
+                // Извлекаем роль из токена
+                String role = jwtTokenUnit.extractRole(jwt);
+
+                // Spring Security ожидает префикс ROLE_ для hasRole()
+                List<SimpleGrantedAuthority> authorities = Collections.singletonList(
+                        new SimpleGrantedAuthority("ROLE_" + role)
                 );
+
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                        username,
+                        null,
+                        authorities // Передаем список ролей вместо пустого ArrayList
+                );
+
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
-                System.out.println("--- АУТЕНТИФИКАЦИЯ УСТАНОВЛЕНА В КОНТЕКСТ");
-            } else {
+                System.out.println("--- АУТЕНТИФИКАЦИЯ УСТАНОВЛЕНА С РОЛЬЮ: " + authorities);
+            }
+            else
+            {
                 System.out.println("--- ОШИБКА: validateToken вернул false!");
             }
         } else {

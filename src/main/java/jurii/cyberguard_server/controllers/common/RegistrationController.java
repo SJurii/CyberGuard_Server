@@ -5,7 +5,7 @@ import jurii.cyberguard_server.DTO.Login;
 import jurii.cyberguard_server.DTO.Registration;
 import jurii.cyberguard_server.entity.User;
 import jurii.cyberguard_server.jwt.JwtTokenUnit;
-import jurii.cyberguard_server.repo.UserRepesitory;
+import jurii.cyberguard_server.repo.UserRepository;
 import jurii.cyberguard_server.services.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,13 +19,13 @@ public class RegistrationController {
     private final AuthService authService;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenUnit jwtTokenUnit;
-    private final UserRepesitory userRepesitory;
+    private final UserRepository userRepository;
 
-    public RegistrationController(AuthService service, PasswordEncoder passwordEncoder, JwtTokenUnit jwtTokenUnit, UserRepesitory userRepesitory){
+    public RegistrationController(AuthService service, PasswordEncoder passwordEncoder, JwtTokenUnit jwtTokenUnit, UserRepository userRepository){
         this.authService = service;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenUnit = jwtTokenUnit;
-        this.userRepesitory = userRepesitory;
+        this.userRepository = userRepository;
     }
 
     @PostMapping("/register")
@@ -39,10 +39,10 @@ public class RegistrationController {
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody Login request) {
-        User user = userRepesitory.findByEmail(request.getEmail());
+        User user = userRepository.findByEmail(request.getEmail());
 
         if (user != null && passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            String token = jwtTokenUnit.generateToken(request.getEmail());
+            String token = jwtTokenUnit.generateToken(user);
             return ResponseEntity.ok(Map.of(
                     "token", token,
                     "id", user.getId(),

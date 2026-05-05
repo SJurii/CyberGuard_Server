@@ -14,14 +14,14 @@ import java.util.List;
 @Service
 public class ScoreService {
 
-    @Autowired private UserRepesitory userRepesitory;
+    @Autowired private UserRepository userRepository;
     @Autowired private UserPointsRepository userPointsRepository;
     @Autowired private RankRepository rankRepository;
     @Autowired private AchivementRepository achivementRepository;
     @Autowired private UserAchivementRepository userAchivementRepository;
 
     public List<AchievementsDirectory> addPoints(Long userId, Integer points, String reason) {
-        User user = userRepesitory.findById(userId).orElseThrow();
+        User user = userRepository.findById(userId).orElseThrow();
 
         Points histore = new Points(user, points, reason);
         userPointsRepository.save(histore);
@@ -34,7 +34,7 @@ public class ScoreService {
             user.setRank(newRank);
         }
 
-        userRepesitory.save(user);
+        userRepository.save(user);
 
         List<AchievementsDirectory> newAchievements = new ArrayList<>();
         List<AchievementsDirectory> locked = achivementRepository.findLockedAchievementsForUser(userId);
