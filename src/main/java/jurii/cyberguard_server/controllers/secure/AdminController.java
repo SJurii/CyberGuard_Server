@@ -71,4 +71,14 @@ public class AdminController {
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    // Получить список всех пользователей
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getAllUsers() {
+
+        return ResponseEntity.ok(
+                userRepository.findAll()
+        );
+    }
 }
