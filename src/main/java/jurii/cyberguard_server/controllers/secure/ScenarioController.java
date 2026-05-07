@@ -5,6 +5,7 @@ import jurii.cyberguard_server.entity.Scenario;
 import jurii.cyberguard_server.repo.ScenarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -52,5 +53,27 @@ public class ScenarioController {
     @GetMapping("/type/{type}")
     public List<Scenario> getScenariosByType(@PathVariable String type) {
         return scenarioRepository.findByType(type);
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> updateScenario(
+            @PathVariable Long id,
+            @RequestBody Scenario updatedScenario
+    ) {
+
+        return scenarioRepository.findById(id)
+                .map(scenario -> {
+
+                    scenario.setName(updatedScenario.getName());
+                    scenario.setTitle(updatedScenario.getTitle());
+                    scenario.setType(updatedScenario.getType());
+                    scenario.setContent(updatedScenario.getContent());
+
+                    scenarioRepository.save(scenario);
+
+                    return ResponseEntity.ok().build();
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 }
